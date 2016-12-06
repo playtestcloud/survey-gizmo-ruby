@@ -16,11 +16,14 @@ module SurveyGizmo
       @route = '/survey/:survey_id/surveypage'
 
       def survey
-        @survey ||= Survey.first(id: survey_id)
+        @survey ||= @client.surveys.first(id: survey_id)
       end
 
       def questions
         @questions.each { |q| q.attributes = children_params }
+        @questions.each do |q|
+          q.instance_variable_set(:@client, @client)
+        end
         return @questions if @questions.all? { |q| q.sub_question_skus.all? { |sku| @questions.find { |q| q.id == sku } } }
 
         # See note on broken subquestions in resource.rb.

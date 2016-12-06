@@ -28,19 +28,19 @@ module SurveyGizmo
       @route[:delete] = @route[:update]
 
       def survey
-        @survey ||= Survey.first(id: survey_id)
+        @survey ||= @client.surveys.first(id: survey_id)
       end
 
       def options
         return parent_question.options.dup.each { |o| o.question_id = id } if parent_question
 
-        @options ||= Option.all(children_params.merge(all_pages: true)).to_a
+        @options ||= @client.options.all(children_params.merge(all_pages: true)).to_a
         @options.each { |o| o.attributes = children_params }
       end
 
       def parent_question
         return nil unless parent_question_id
-        @parent_question ||= Question.first(survey_id: survey_id, id: parent_question_id)
+        @parent_question ||= @client.questions.first(survey_id: survey_id, id: parent_question_id)
       end
 
       def sub_question_skus
@@ -52,8 +52,8 @@ module SurveyGizmo
 
       def sub_questions
         @sub_questions ||= sub_question_skus.map do |sku|
-          SurveyGizmo.configuration.logger.debug("Have to do individual load of sub question #{sku}...")
-          subquestion = Question.first(survey_id: survey_id, id: sku)
+          @client.debug("Have to do individual load of sub question #{sku}...")
+          subquestion = @client.questions.first(survey_id: survey_id, id: sku)
           subquestion.parent_question_id = id
           subquestion
         end

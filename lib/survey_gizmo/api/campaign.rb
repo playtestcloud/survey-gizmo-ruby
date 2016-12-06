@@ -26,7 +26,7 @@ module SurveyGizmo
       @route = '/survey/:survey_id/surveycampaign'
 
       def contacts(conditions = {})
-        Contact.all(conditions.merge(children_params).merge(all_pages: !conditions[:page]))
+        @client.contacts.all(conditions.merge(children_params).merge(all_pages: !conditions[:page]))
       end
     end
   end

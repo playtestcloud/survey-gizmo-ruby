@@ -31,7 +31,7 @@ module SurveyGizmo
         # SurveyGizmo sends down the page info to .first requests but NOT to .all requests, so we must load pages
         # manually.  We should be able to just .reload this Survey BUT we can't make :pages a Virtus attribute without
         # requiring a call to this method during Survey.save
-        @pages ||= Page.all(children_params.merge(all_pages: true)).to_a
+        @pages ||= @client.pages.all(children_params.merge(all_pages: true)).to_a
         @pages.each { |p| p.attributes = children_params }
       end
 
@@ -47,7 +47,7 @@ module SurveyGizmo
       end
 
       def responses(conditions = {})
-        Response.all(conditions.merge(children_params).merge(all_pages: !conditions[:page]))
+        @client.responses.all(conditions.merge(children_params).merge(all_pages: !conditions[:page]))
       end
 
       # Statistics array of arrays looks like:
@@ -61,7 +61,7 @@ module SurveyGizmo
       end
 
       def server_has_new_results_since?(time)
-        Response.all(children_params.merge(page: 1, resultsperpage: 1, filters: Response.submitted_since_filter(time))).to_a.size > 0
+        @client.responses.all(children_params.merge(page: 1, resultsperpage: 1, filters: Response.submitted_since_filter(time))).to_a.size > 0
       end
 
       # As of 2015-12-18, when you request data on multiple surveys from /survey, the team variable comes
@@ -80,7 +80,7 @@ module SurveyGizmo
       end
 
       def campaigns
-        @campaigns ||= Campaign.all(children_params.merge(all_pages: true)).to_a
+        @campaigns ||= @client.campaigns.all(children_params.merge(all_pages: true)).to_a
       end
     end
   end

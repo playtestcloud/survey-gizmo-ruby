@@ -33,7 +33,7 @@ module SurveyGizmo
       @route = '/survey/:survey_id/surveyresponse'
 
       def survey
-        @survey ||= Survey.first(id: survey_id)
+        @survey ||= @client.surveys.first(id: survey_id)
       end
 
       def parsed_answers
