@@ -18,6 +18,8 @@ RSpec.configure do |config|
 
       config.retry_attempts = 0
       config.retry_interval = 0
+
+      config.log_level = Logger::FATAL
     end
 
     @base = "#{@client.configuration.api_url}/#{@client.configuration.api_version}"

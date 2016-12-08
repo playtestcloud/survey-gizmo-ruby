@@ -37,11 +37,13 @@ module SurveyGizmo
     end
 
     def logger
-      SurveyGizmo::Logger.new(
+      gizmo_logger = SurveyGizmo::Logger.new(
         configuration.api_token,
         configuration.api_token_secret,
         STDOUT
       )
+      gizmo_logger.level = @configuration.log_level
+      gizmo_logger
     end
 
     def reset!

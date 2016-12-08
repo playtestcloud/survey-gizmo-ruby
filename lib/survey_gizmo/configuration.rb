@@ -6,6 +6,7 @@ module SurveyGizmo
     DEFAULT_RETRIES = 3
     DEFAULT_RETRY_INTERVAL = 60
     DEFAULT_REGION = :us
+    DEFAULT_LOG_LEVEL = Logger::FATAL
 
     REGION_INFO = {
       us: {
@@ -30,6 +31,7 @@ module SurveyGizmo
     attr_accessor :timeout_seconds
     attr_accessor :retry_attempts
     attr_accessor :retry_interval
+    attr_accessor :log_level
 
     def initialize
       @api_token = ENV['SURVEYGIZMO_API_TOKEN'] || nil
@@ -43,6 +45,7 @@ module SurveyGizmo
       @retry_interval = DEFAULT_RETRY_INTERVAL
       self.region = DEFAULT_REGION
 
+      @log_level = DEFAULT_LOG_LEVEL
       @api_debug = ENV['GIZMO_DEBUG'].to_s =~ /^(true|t|yes|y|1)$/i
     end
 
