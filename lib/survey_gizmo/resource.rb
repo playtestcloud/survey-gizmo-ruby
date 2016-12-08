@@ -10,6 +10,7 @@ module SurveyGizmo
     included do
       include Virtus.model
       instance_variable_set('@route', nil)
+      instance_variable_set('@resource_client', nil)
       SurveyGizmo::Resource.descendants << self
     end
 
@@ -33,7 +34,6 @@ module SurveyGizmo
     end
 
     ### BELOW HERE ARE INSTANCE METHODS ###
-
     # If we have an id, it's an update because we already know the surveygizmo assigned id
     # Returns itself if successfully saved, but with attributes (like id) added by SurveyGizmo
     def save
@@ -93,8 +93,20 @@ module SurveyGizmo
       route_params.merge(klass_id.to_sym => id).reject { |k, v| k == :id }
     end
 
+    def client
+      @client
+    end
+
+    def client=(client)
+      @client = client
+    end
+
+    def resource_client
+      ResourceClient.new(@client, self.class)
+    end
+
     def create_route(method)
-      self.class.create_route(@client, method, route_params)
+      resource_client.create_route(method, route_params)
     end
   end
 end

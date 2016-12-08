@@ -22,7 +22,7 @@ module SurveyGizmo
       def questions
         @questions.each { |q| q.attributes = children_params }
         @questions.each do |q|
-          q.instance_variable_set(:@client, @client)
+          q.client = @client
         end
         return @questions if @questions.all? { |q| q.sub_question_skus.all? { |sku| @questions.find { |q| q.id == sku } } }
 

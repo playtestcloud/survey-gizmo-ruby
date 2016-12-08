@@ -11,16 +11,15 @@ RSpec.configure do |config|
   config.include SurveyGizmoSpec::Methods
 
   config.before(:each) do
-    SurveyGizmo.configure do |config|
+    @client = SurveyGizmo::Client.new
+    @client.configure do |config|
       config.api_token = 'king_of_the_whirled'
       config.api_token_secret = 'dreamword'
 
       config.retry_attempts = 0
       config.retry_interval = 0
-
-      config.logger.level = Logger::FATAL
     end
 
-    @base = "#{SurveyGizmo.configuration.api_url}/#{SurveyGizmo.configuration.api_version}"
+    @base = "#{@client.configuration.api_url}/#{@client.configuration.api_version}"
   end
 end

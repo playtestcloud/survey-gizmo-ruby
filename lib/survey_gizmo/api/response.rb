@@ -7,14 +7,6 @@ module SurveyGizmo
       NO_TEST_DATA =   { field: 'istestdata', operator: '<>', value: 1 }
       ONLY_COMPLETED = { field: 'status',     operator: '=',  value: 'Complete' }
 
-      def self.submitted_since_filter(time)
-        {
-          field: 'datesubmitted',
-          operator: '>=',
-          value: time.in_time_zone(SurveyGizmo.configuration.api_time_zone).strftime('%Y-%m-%d %H:%M:%S')
-        }
-      end
-
       attribute :id,                   Integer
       attribute :survey_id,            Integer
       attribute :contact_id,           Integer

@@ -1,8 +1,14 @@
 require 'spec_helper'
 
 describe 'Survey Gizmo Resource' do
-  let(:create_attributes_to_compare) { }
-  let(:get_attributes_to_compare) { }
+  before(:each) do
+    @resource_client = SurveyGizmo::ResourceClient.new(
+      @client,
+      described_class
+    )
+  end
+  let(:create_attributes_to_compare) {}
+  let(:get_attributes_to_compare) {}
 
   describe SurveyGizmo::Resource do
     let(:described_class)   { SurveyGizmoSpec::ResourceTest }
@@ -10,27 +16,36 @@ describe 'Survey Gizmo Resource' do
     let(:update_attributes) { { title: 'Updated' } }
     let(:first_params)      { { id: 1, test_id: 5 } }
     let(:get_attributes)    { create_attributes.merge(id: 1) }
-    let(:uri_paths){
+    let(:uri_paths) do
       {
         get:    '/test/1',
         create: '/test/5/resource',
         update: '/test/5/resource/1',
         delete: '/test/5/resource/1'
       }
-    }
+    end
 
     it '#reload' do
-      stub_request(:get, /#{@base}/).to_return(json_response(true, get_attributes))
+      stub_request(
+        :get, /#{@base}/
+      ).to_return(
+        json_response(true, get_attributes)
+      )
       obj = described_class.new(get_attributes.merge(update_attributes))
-      obj.attributes.reject { |k, v| v.blank? }.should == get_attributes.merge(update_attributes)
+      obj.client = @client
+      obj.attributes.reject do |_, v|
+        v.blank?
+      end.should eq(get_attributes.merge(update_attributes))
       obj.reload
-      obj.attributes.reject { |k, v| v.blank? }.should == get_attributes
+      obj.attributes.reject { |_, v| v.blank? }.should eq(get_attributes)
     end
 
     it 'should raise an error if params are missing' do
-      lambda {
-        SurveyGizmoSpec::ResourceTest.destroy(test_id: 5)
-      }.should raise_error(SurveyGizmo::URLError, 'Missing RESTful parameters in request: `:id`')
+      lambda do
+        @resource_client.destroy(test_id: 5)
+      end.should(raise_error(
+        SurveyGizmo::URLError, 'Missing RESTful parameters in request: `:id`'
+      ))
     end
 
     it_should_behave_like 'an API object'
@@ -41,11 +56,11 @@ describe 'Survey Gizmo Resource' do
       let(:filters) { { page: page, filters: [{ field: 'istestdata', operator: '<>', value: 1 }] } }
 
       it 'should generate the correct page request' do
-        expect(SurveyGizmoSpec::ResourceTest.send(:filters_to_query_string, { page: page })).to eq("?page=#{page}")
+        expect(SurveyGizmo::Client.send(:filters_to_query_string, { page: page })).to eq("?page=#{page}")
       end
 
       it 'should generate the correct filter fragment' do
-        expect(SurveyGizmoSpec::ResourceTest.send(:filters_to_query_string, filters)).to eq("?filter%5Bfield%5D%5B0%5D=istestdata&filter%5Boperator%5D%5B0%5D=%3C%3E&filter%5Bvalue%5D%5B0%5D=1&page=#{page}")
+        expect(SurveyGizmo::Client.send(:filters_to_query_string, filters)).to eq("?filter%5Bfield%5D%5B0%5D=istestdata&filter%5Boperator%5D%5B0%5D=%3C%3E&filter%5Bvalue%5D%5B0%5D=1&page=#{page}")
       end
     end
   end
@@ -66,6 +81,7 @@ describe 'Survey Gizmo Resource' do
 
     it 'should parse the number of completed records correctly' do
       survey = described_class.new('statistics' => [['Partial', 2], ['Disqualified', 28], ['Complete', 15]])
+      survey.client = @client
       expect(survey.number_of_completed_responses).to eq(15)
     end
 
@@ -73,6 +89,7 @@ describe 'Survey Gizmo Resource' do
       stub_request(:get, /#{@base}\/survey\/1\/surveyresponse/).to_return(json_response(true, []))
 
       survey = described_class.new(id: 1)
+      survey.client = @client
       expect(survey.server_has_new_results_since?(Time.now)).to be_false
       a_request(:get, /#{@base}\/survey\/1\/surveyresponse/).should have_been_made
     end
@@ -105,7 +122,9 @@ describe 'Survey Gizmo Resource' do
 
     it 'should find the survey' do
       stub_request(:get, /#{@base}\/survey\/1234/).to_return(json_response(true, get_attributes))
-      described_class.new(base_params).survey
+      question = described_class.new(base_params)
+      question.client = @client
+      question.survey
       a_request(:get, /#{@base}\/survey\/1234/).should have_been_made
     end
 
@@ -138,7 +157,7 @@ describe 'Survey Gizmo Resource' do
         end
 
         it 'correctly parses options out of question data' do
-          question = described_class.first(survey_id: survey_id, id: question_id)
+          question = @resource_client.first(survey_id: survey_id, id: question_id)
           expect(question.options.all? { |o| o.question_id == question_id && o.survey_id == survey_id }).to be_true
           expect(question.options.map { |o| o.id }).to eq([10014, 10015])
           a_request(:get, /#{@base}\/.*surveyoption/).should_not have_been_made
@@ -146,6 +165,7 @@ describe 'Survey Gizmo Resource' do
 
         it 'correctly parses sub question options' do
           question = described_class.new(survey_id: survey_id, id: question_id + 1, parent_question_id: question_id)
+          question.client = @client
           expect(question.parent_question.id).to eq(described_class.new(body_data).id)
           expect(question.options.all? { |o| o.question_id == question.id && o.survey_id == survey_id }).to be_true
           expect(question.options.map { |o| o.id }).to eq([10014, 10015])
@@ -158,6 +178,10 @@ describe 'Survey Gizmo Resource' do
       let(:parent_id) { 33 }
       let(:skus) { [544, 322] }
       let(:question_with_subquestions) { described_class.new(id: parent_id, survey_id: 1234, sub_question_skus: skus) }
+
+      before(:each) do
+        question_with_subquestions.client = @client
+      end
 
       it 'should have no subquestions' do
         expect(described_class.new.sub_questions).to eq([])
@@ -220,8 +244,9 @@ describe 'Survey Gizmo Resource' do
   end
 
   describe SurveyGizmo::API::Response do
-    let(:create_attributes) { {:survey_id => 1234, :datesubmitted => "2015-04-15 05:46:30" } }
-    let(:create_attributes_to_compare) { create_attributes.merge(:datesubmitted => Time.parse("2015-04-15 05:46:30 -0400")) }
+    # datesubmitted is specified as DateTime, not Time
+    let(:create_attributes) { {:survey_id => 1234, :datesubmitted => "2015-04-15 05:46:30 -0400" } }
+    let(:create_attributes_to_compare) { create_attributes.merge(:datesubmitted => DateTime.parse("2015-04-15 05:46:30 -0400")) }
     let(:get_attributes)    { create_attributes.merge(:id => 1) }
     let(:get_attributes_to_compare)    { create_attributes_to_compare.merge(:id => 1) }
     let(:update_attributes) { {:survey_id => 1234, :title => 'Updated'} }
@@ -236,8 +261,8 @@ describe 'Survey Gizmo Resource' do
     it_should_behave_like 'an object with errors'
 
     context 'during EST' do
-      let(:create_attributes) { {:survey_id => 1234, :datesubmitted => "2015-01-15 05:46:30" } }
-      let(:create_attributes_to_compare) { create_attributes.merge(:datesubmitted => Time.parse("2015-01-15 05:46:30 -0500")) }
+      let(:create_attributes) { {:survey_id => 1234, :datesubmitted => "2015-01-15 05:46:30 -0500" } }
+      let(:create_attributes_to_compare) { create_attributes.merge(:datesubmitted => DateTime.parse("2015-01-15 05:46:30 -0500")) }
 
       it_should_behave_like 'an API object'
       it_should_behave_like 'an object with errors'
@@ -292,15 +317,15 @@ describe 'Survey Gizmo Resource' do
     pending('Need an account with admin privileges to test this')
     let(:create_attributes) { { teamid: 1234, teamname: 'team' } }
     let(:get_attributes)    { create_attributes.merge(id: 1234) }
-    let(:update_attributes) { create_attributes }
-    let(:first_params)      { { teamname: 'team' } }
+    let(:update_attributes) { get_attributes }
+    let(:first_params)      { get_attributes }
     let(:uri_paths) do
-      h = { :create => '/account_teams/1234' }
-      h.default = '/account_teams/1234'
+      h = { :create => '/accountteams' }
+      h.default = '/accountteams/1234'
       h
     end
 
-    #it_should_behave_like 'an API object'
-    #it_should_behave_like 'an object with errors'
+    it_should_behave_like 'an API object'
+    it_should_behave_like 'an object with errors'
   end
 end

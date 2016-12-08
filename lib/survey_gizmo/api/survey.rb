@@ -61,7 +61,13 @@ module SurveyGizmo
       end
 
       def server_has_new_results_since?(time)
-        @client.responses.all(children_params.merge(page: 1, resultsperpage: 1, filters: Response.submitted_since_filter(time))).to_a.size > 0
+        @client.responses.all(
+          children_params.merge(
+            page: 1,
+            resultsperpage: 1,
+            filters: @client.responses.submitted_since_filter(time)
+          )
+        ).to_a.size > 0
       end
 
       # As of 2015-12-18, when you request data on multiple surveys from /survey, the team variable comes

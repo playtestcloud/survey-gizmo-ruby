@@ -139,5 +139,31 @@ module SurveyGizmo
     def surveys
       ResourceClient.new(self, SurveyGizmo::API::Survey)
     end
+
+    def filters_to_query_string(params)
+      self.class.filters_to_query_string(params)
+    end
+
+    # Convert a [Hash] of params and internal surveygizmo style filters into a query string
+    #
+    # The hashes at the :filters key get turned into URL params like:
+    # # filter[field][0]=istestdata&filter[operator][0]=<>&filter[value][0]=1
+    def self.filters_to_query_string(params = {})
+      return '' unless params && params.size > 0
+
+      params = params.dup
+      url_params = {}
+
+      Array.wrap(params.delete(:filters)).each_with_index do |filter, i|
+        fail "Bad filter params: #{filter}" unless filter.is_a?(Hash) && [:field, :operator, :value].all? { |k| filter[k] }
+
+        url_params["filter[field][#{i}]".to_sym]    = "#{filter[:field]}"
+        url_params["filter[operator][#{i}]".to_sym] = "#{filter[:operator]}"
+        url_params["filter[value][#{i}]".to_sym]    = "#{filter[:value]}"
+      end
+
+      uri = Addressable::URI.new(query_values: url_params.merge(params))
+      "?#{uri.query}"
+    end
   end
 end
