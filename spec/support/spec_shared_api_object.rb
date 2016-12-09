@@ -15,14 +15,14 @@ shared_examples_for 'an API object' do
     it "should make a request and create a new instance" do
       stub_api_call(:put)
       obj = @resource_client.create(create_attributes)
-      obj.should be_instance_of(described_class)
+      expect(obj).to be_instance_of(described_class)
       a_request(:put, /#{@base}#{uri_paths[:create]}/).should have_been_made
     end
 
     it "should set the attributes" do
       stub_request(:put, /#{@base}/).to_return(json_response(true, create_attributes))
       obj = @resource_client.create(create_attributes)
-      obj.attributes.reject { |k, v| v.blank? }.should == (create_attributes_to_compare || create_attributes)
+      expect(obj.attributes.reject { |k, v| v.blank? }).to eq(create_attributes_to_compare || create_attributes)
     end
   end
 
@@ -30,8 +30,8 @@ shared_examples_for 'an API object' do
     it "should make a request and set the attributes" do
       stub_request(:get, /#{@base}/).to_return(json_response(true, get_attributes))
       obj = @resource_client.first(first_params)
-      a_request(:get, /#{@base}#{uri_paths[:get]}/).should have_been_made
-      obj.attributes.reject { |k, v| v.blank? }.should == (get_attributes_to_compare || get_attributes)
+      expect(a_request(:get, /#{@base}#{uri_paths[:get]}/)).to have_been_made
+      expect(obj.attributes.reject { |k, v| v.blank? }).to eq(get_attributes_to_compare || get_attributes)
     end
 
     it "should return false if the request fails" do
@@ -55,7 +55,7 @@ shared_examples_for 'an API object' do
     it "should make a request" do
       stub_api_call(:delete)
       @obj.destroy
-      a_request(:delete, /#{@base}#{uri_paths[:delete]}/).should have_been_made
+      expect(a_request(:delete, /#{@base}#{uri_paths[:delete]}/)).to have_been_made
     end
 
     it "cannot be destroyed if new" do
@@ -68,12 +68,12 @@ shared_examples_for 'an API object' do
     it "should make a request" do
       stub_api_call(:delete)
       @resource_client.destroy(first_params)
-      a_request(:delete, /#{@base}#{uri_paths[:delete]}/).should have_been_made
+      expect(a_request(:delete, /#{@base}#{uri_paths[:delete]}/)).to have_been_made
     end
 
     it "should return result" do
       stub_api_call(:delete)
-      @resource_client.destroy(first_params).should be_true
+      expect(@resource_client.destroy(first_params)).to be_truthy
     end
   end
 
@@ -83,7 +83,7 @@ shared_examples_for 'an API object' do
       obj = described_class.new(create_attributes)
       obj.client = @client
       obj.save
-      a_request(:put, /#{@base}#{uri_paths[:create]}/).should have_been_made
+      expect(a_request(:put, /#{@base}#{uri_paths[:create]}/)).to have_been_made
     end
 
     it "should call update on a created resource" do
@@ -91,7 +91,7 @@ shared_examples_for 'an API object' do
       obj.client = @client
       stub_api_call(:post)
       obj.save
-      a_request(:post, /#{@base}#{uri_paths[:update]}/).should have_been_made
+      expect(a_request(:post, /#{@base}#{uri_paths[:update]}/)).to have_been_made
     end
   end
   context '#all' do
@@ -106,11 +106,11 @@ shared_examples_for 'an API object' do
     it "should make a get request" do
       stub_request(:get, /#{@base}/).to_return(json_response(true, data))
       iterator = @resource_client.all(get_attributes.merge(page: 1))
-      iterator.should be_instance_of(Enumerator)
+      expect(iterator).to be_instance_of(Enumerator)
       collection = iterator.to_a
-      a_request(:get, /#{@base}#{uri_paths[:create]}/).should have_been_made
-      collection.first.should be_instance_of(described_class)
-      collection.length.should == 3
+      expect(a_request(:get, /#{@base}#{uri_paths[:create]}/)).to have_been_made
+      expect(collection.first).to be_instance_of(described_class)
+      expect(collection.length).to eq(3)
     end
   end
 end
