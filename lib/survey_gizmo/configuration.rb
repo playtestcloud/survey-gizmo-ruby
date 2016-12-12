@@ -1,6 +1,6 @@
 module SurveyGizmo
   class Configuration
-    DEFAULT_API_VERSION = 'v4'.freeze
+    DEFAULT_API_VERSION = 'v5'.freeze
     DEFAULT_RESULTS_PER_PAGE = 50
     DEFAULT_TIMEOUT_SECONDS = 300
     DEFAULT_RETRIES = 3

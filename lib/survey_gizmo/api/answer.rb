@@ -8,6 +8,8 @@ module SurveyGizmo
       attribute :survey_id,     Integer
       attribute :response_id,   Integer
       attribute :question_id,   Integer
+      attribute :question_text, String
+      attribute :question_type, String
       attribute :option_id,     Integer
       attribute :submitted_at,  DateTime
       attribute :answer_text,   String
@@ -16,27 +18,26 @@ module SurveyGizmo
 
       def initialize(attrs = {})
         self.attributes = attrs
+        self.question_id = value['id']
+        self.question_text = value['question']
+        self.question_type = value['type']
 
-        case key
-        when /\[question\((\d+)\),\s*option\((\d+|"\d+-other")\)\]/
-          self.question_id, self.option_id = $1, $2
-
-          if option_id =~ /-other/
-            option_id.delete!('-other"')
-            self.other_text = value
-          end
-        when /\[question\((\d+)\),\s*question_pipe\("?([^"]*)"?\)\]/
-          self.question_id, self.question_pipe = $1, $2
-        when /\[question\((\d+)\)\]/
-          self.question_id = $1
+        if value['options']
+          self.answer_text = selected_options_texts.join(', ')
         else
-          fail "Can't recognize pattern for #{attrs[:key]} => #{attrs[:value]} - you may have to parse your answers manually."
+          self.answer_text = value['answer']
         end
+      end
 
-        self.question_id = question_id.to_i
-        if option_id
-          fail "Bad option_id #{option_id} (class: #{option_id.class}) for #{attrs}!" if option_id.to_i == 0 && option_id != '0' && option_id != 0
-          self.option_id = option_id.to_i
+      def selected_options_texts
+        selected_options.map do |opt|
+          opt['answer']
+        end
+      end
+
+      def selected_options
+        value['options'].values.reject do |opt|
+          opt['answer'].nil?
         end
       end
 

@@ -24,16 +24,7 @@ module SurveyGizmo
         @questions.each do |q|
           q.client = @client
         end
-        return @questions if @questions.all? { |q| q.sub_question_skus.all? { |sku| @questions.find { |q| q.id == sku } } }
-
-        # See note on broken subquestions in resource.rb.
-        with_subquestions = @questions
-        @questions.each do |q|
-          with_subquestions.reject! { |q| q.sub_question_skus.include?(q.id) }
-          with_subquestions += q.sub_questions
-        end
-
-        @questions = with_subquestions.each { |q| q.attributes = children_params }
+        @questions
       end
     end
   end

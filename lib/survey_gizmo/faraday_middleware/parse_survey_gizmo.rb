@@ -16,9 +16,9 @@ module SurveyGizmo
 
     TIME_FIELDS = [
       'created_on',
-      'datecreated',
-      'datemodified',
-      'datesubmitted',
+      'date_created',
+      'date_modified',
+      'date_submitted',
       'modified_on'
     ]
 
@@ -36,12 +36,8 @@ module SurveyGizmo
       PAGINATION_FIELDS.each { |n| body[n] = body[n].to_i if body[n] }
 
       next body unless body['data']
-
       # Handle really crappy [] notation in SG API, so far just in SurveyResponse
       Array.wrap(body['data']).compact.each do |datum|
-        # SurveyGizmo returns date information using US/Eastern or Berlin timezone depending on which URI you use, but
-        # does not return any information about the timezone.
-        # See https://apihelp.surveygizmo.com/help/article/link/surveyresponse-returned-fields#examplereturns
 
         datum.keys.grep(/^\[/).each do |key|
           next if datum[key].nil? || datum[key].length == 0

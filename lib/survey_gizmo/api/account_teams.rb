@@ -7,8 +7,7 @@ module SurveyGizmo
       include SurveyGizmo::Resource
 
       attribute :id,            Integer
-      attribute :teamid,        Integer
-      attribute :teamname,      String
+      attribute :team_name,     String
       attribute :color,         String
       attribute :default_role,  String
       attribute :status,        String

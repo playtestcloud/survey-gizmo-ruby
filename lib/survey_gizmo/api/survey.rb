@@ -7,8 +7,9 @@ module SurveyGizmo
 
       attribute :id,             Integer
       attribute :team,           Array
+      attribute :base_type,      String
       attribute :type,           String
-      attribute :_subtype,       String
+      attribute :subtype,        String
       attribute :status,         String
       attribute :forward_only,   Boolean
       attribute :title,          String
@@ -43,7 +44,9 @@ module SurveyGizmo
       end
 
       def actual_questions
-        questions.reject { |q| q.type =~ /^(instructions|urlredirect|logic|media|script|javascript)$/ }
+        questions.select do |q|
+          q.base_type == 'Question' || q.base_type == 'SurveyQuestion'
+        end
       end
 
       def responses(conditions = {})

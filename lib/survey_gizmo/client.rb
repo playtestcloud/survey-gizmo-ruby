@@ -67,7 +67,7 @@ module SurveyGizmo
         connection.request :url_encoded
 
         connection.response(:parse_survey_gizmo_data)
-        connection.response(:json, content_type: /\bjson$/)
+        connection.response(:json, contenttype: /\bjson$/)
 
         if configuration.api_debug
           connection.response(
@@ -107,7 +107,7 @@ module SurveyGizmo
     end
 
     def account_teams
-      ResourceClient.new(self, SurveyGizmo::API::AccountTeam)
+      ResourceClient.new(self, SurveyGizmo::API::AccountTeams)
     end
 
     def campaigns

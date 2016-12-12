@@ -116,8 +116,8 @@ describe 'Survey Gizmo Resource' do
       expect(described_class.new('title' => {'English' => 'Some title'}).title).to eq('Some title')
     end
 
-    it 'should handle the _subtype key' do
-      described_class.new(:_subtype => 'radio').type.should == 'radio'
+    it 'should handle the subtype key' do
+      described_class.new(:subtype => 'radio').type.should == 'radio'
     end
 
     it 'should find the survey' do
@@ -177,7 +177,7 @@ describe 'Survey Gizmo Resource' do
     context 'subquestions' do
       let(:parent_id) { 33 }
       let(:skus) { [544, 322] }
-      let(:question_with_subquestions) { described_class.new(id: parent_id, survey_id: 1234, sub_question_skus: skus) }
+      let(:question_with_subquestions) { described_class.new(id: parent_id, survey_id: 1234, sub_questions: skus) }
 
       before(:each) do
         question_with_subquestions.client = @client
@@ -198,7 +198,7 @@ describe 'Survey Gizmo Resource' do
 
       context 'and shortname' do
         let(:sku) { 6 }
-        let(:question_with_subquestions) { described_class.new(id: parent_id, survey_id: 1234, sub_question_skus: [["0", sku], ["foo", 8]]) }
+        let(:question_with_subquestions) { described_class.new(id: parent_id, survey_id: 1234, sub_questions: [["0", sku], ["foo", 8]]) }
 
         it 'should have 2 subquestions and they should have the right parent question' do
           stub_request(:get, /#{@base}/).to_return(json_response(true, get_attributes))
@@ -244,9 +244,9 @@ describe 'Survey Gizmo Resource' do
   end
 
   describe SurveyGizmo::API::Response do
-    # datesubmitted is specified as DateTime, not Time
-    let(:create_attributes) { {:survey_id => 1234, :datesubmitted => "2015-04-15 05:46:30 -0400" } }
-    let(:create_attributes_to_compare) { create_attributes.merge(:datesubmitted => DateTime.parse("2015-04-15 05:46:30 -0400")) }
+    # date_submitted is specified as DateTime, not Time
+    let(:create_attributes) { {:survey_id => 1234, :date_submitted => "2015-04-15 05:46:30 -0400" } }
+    let(:create_attributes_to_compare) { create_attributes.merge(:date_submitted => DateTime.parse("2015-04-15 05:46:30 -0400")) }
     let(:get_attributes)    { create_attributes.merge(:id => 1) }
     let(:get_attributes_to_compare)    { create_attributes_to_compare.merge(:id => 1) }
     let(:update_attributes) { {:survey_id => 1234, :title => 'Updated'} }
@@ -261,8 +261,8 @@ describe 'Survey Gizmo Resource' do
     it_should_behave_like 'an object with errors'
 
     context 'during EST' do
-      let(:create_attributes) { {:survey_id => 1234, :datesubmitted => "2015-01-15 05:46:30 -0500" } }
-      let(:create_attributes_to_compare) { create_attributes.merge(:datesubmitted => DateTime.parse("2015-01-15 05:46:30 -0500")) }
+      let(:create_attributes) { {:survey_id => 1234, :date_submitted => "2015-01-15 05:46:30 -0500" } }
+      let(:create_attributes_to_compare) { create_attributes.merge(:date_submitted => DateTime.parse("2015-01-15 05:46:30 -0500")) }
 
       it_should_behave_like 'an API object'
       it_should_behave_like 'an object with errors'
@@ -315,7 +315,7 @@ describe 'Survey Gizmo Resource' do
 
   describe SurveyGizmo::API::AccountTeams do
     pending('Need an account with admin privileges to test this')
-    let(:create_attributes) { { teamid: 1234, teamname: 'team' } }
+    let(:create_attributes) { { id: 1234, team_name: 'team' } }
     let(:get_attributes)    { create_attributes.merge(id: 1234) }
     let(:update_attributes) { get_attributes }
     let(:first_params)      { get_attributes }

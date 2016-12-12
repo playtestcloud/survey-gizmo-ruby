@@ -9,6 +9,7 @@ module SurveyGizmo
       attribute :page_id,       Integer
       attribute :question_id,   Integer
       attribute :value,         String
+      attribute :title,         String
       attribute :properties,    Hash
 
       @route = '/survey/:survey_id/surveypage/:page_id/surveyquestion/:question_id/surveyoption'

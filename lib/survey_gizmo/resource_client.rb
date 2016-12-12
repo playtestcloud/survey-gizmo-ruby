@@ -97,7 +97,7 @@ module SurveyGizmo
 
     def submitted_since_filter(time)
       {
-        field: 'datesubmitted',
+        field: 'date_submitted',
         operator: '>=',
         value: time.in_time_zone(@client.configuration.api_time_zone).strftime('%Y-%m-%d %H:%M:%S')
       }
