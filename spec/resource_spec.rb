@@ -44,9 +44,9 @@ describe 'Survey Gizmo Resource' do
     it 'should raise an error if params are missing' do
       expect(lambda {
         @resource_client.destroy(test_id: 5)
-      }).to raise_error(SurveyGizmo::URLError, 'Missing RESTful parameters in request: `:id`')
+      }).to raise_error(
         SurveyGizmo::URLError, 'Missing RESTful parameters in request: `:id`'
-      ))
+      )
     end
 
     it_should_behave_like 'an API object'
