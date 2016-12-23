@@ -118,15 +118,15 @@ describe 'Survey Gizmo Resource' do
     end
 
     it 'should handle the subtype key' do
-      expect(described_class.new(:_subtype => 'radio').type).to eq('radio')
+      expect(described_class.new(:subtype => 'radio').type).to eq('radio')
     end
 
     it 'should find the survey' do
       stub_request(:get, /#{@base}\/survey\/1234/).to_return(json_response(true, get_attributes))
       question = described_class.new(base_params)
       question.client = @client
-      expect(a_request(:get, /#{@base}\/survey\/1234/)).to have_been_made
       question.survey
+      expect(a_request(:get, /#{@base}\/survey\/1234/)).to have_been_made
     end
 
     context 'options' do
@@ -177,11 +177,17 @@ describe 'Survey Gizmo Resource' do
 
     context 'subquestions' do
       let(:parent_id) { 33 }
-      let(:skus) { [544, 322] }
-      let(:question_with_subquestions) { described_class.new(id: parent_id, survey_id: 1234, sub_questions: skus) }
+      let(:subquestions) {
+        [
+          described_class.new(id: 544, survey_id: 1234, parent_question_id: parent_id),
+          described_class.new(id: 322, survey_id: 1234, parent_question_id: parent_id)
+        ]
+      }
+      let(:question_with_subquestions) { described_class.new(id: parent_id, survey_id: 1234, sub_questions: subquestions) }
 
       before(:each) do
         question_with_subquestions.client = @client
+        subquestions.each { |sq| sq.client = @client }
       end
 
       it 'should have no subquestions' do
@@ -193,15 +199,19 @@ describe 'Survey Gizmo Resource' do
         expect(question_with_subquestions.sub_questions.size).to eq(2)
 
         question_with_subquestions.sub_questions.first.parent_question
-        expect(a_request(:get, /#{@base}\/survey\/1234\/surveyquestion\/#{parent_id}/)).to have_been_made
-        skus.each do |sku|
-          expect(a_request(:get, /#{@base}\/survey\/1234\/surveyquestion\/#{sku}/)).to have_been_made
-        end
+        question_with_subquestions.sub_questions.last.parent_question
+        expect(a_request(:get, /#{@base}\/survey\/1234\/surveyquestion\/#{parent_id}/)).to have_been_made.twice
       end
 
       context 'and shortname' do
         let(:sku) { 6 }
-        let(:question_with_subquestions) { described_class.new(id: parent_id, survey_id: 1234, sub_questions: [["0", sku], ["foo", 8]]) }
+        let(:subquestions) {
+          [
+            described_class.new(id: 6, shortname: '0', survey_id: 1234, parent_question_id: parent_id),
+            described_class.new(id: 8, shortname: 'foo', survey_id: 1234, parent_question_id: parent_id)
+          ]
+        }
+        let(:question_with_subquestions) { described_class.new(id: parent_id, survey_id: 1234, sub_questions: subquestions) }
 
         it 'should have 2 subquestions and they should have the right parent question' do
           stub_request(:get, /#{@base}/).to_return(json_response(true, get_attributes))
@@ -209,7 +219,6 @@ describe 'Survey Gizmo Resource' do
 
           question_with_subquestions.sub_questions.first.parent_question
           expect(a_request(:get, /#{@base}\/survey\/1234\/surveyquestion\/#{parent_id}/)).to have_been_made
-          expect(a_request(:get, /#{@base}\/survey\/1234\/surveyquestion\/#{sku}/)).to have_been_made
         end
       end
     end
