@@ -309,18 +309,6 @@ describe 'Survey Gizmo Resource' do
         )
         expect(response.parsed_answers.map { |a| a.to_hash }).to eq([ { survey_id: survey_id, response_id: response_id, question_id: 5, answer_text: "VERY important", submitted_at: timestamp }])
       end
-
-      it 'should parse the answers and remove extraneous answers' do
-        expect(described_class.new(answers: answers, survey_id: 1).parsed_answers.map { |a| a.to_hash }).to eq([
-          { survey_id: 1, question_id: 3, option_id: 10021, other_text: 'Some other text field answer' },
-          { survey_id: 1, question_id: 5, answer_text: 'VERY important' },
-          { survey_id: 1, question_id: 8, answer_text: 'false' },
-          { survey_id: 1, question_id: 9, option_id: 10002 },
-          { survey_id: 1, question_id: 10, question_pipe: 'Que aplicación', answer_text: '5 = Extremely important' },
-          { survey_id: 1, question_id: 11, question_pipe: '10527', answer_text: 'This product was too expensive' },
-          { survey_id: 1, question_id: 12, option_id: 10017, other_text: 'I understood...' }
-        ])
-      end
     end
   end
 
