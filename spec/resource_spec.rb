@@ -327,7 +327,7 @@ describe 'Survey Gizmo Resource' do
 
   describe SurveyGizmo::API::AccountTeams do
     pending('Need an account with admin privileges to test this')
-    let(:create_attributes) { { id: 1234, team_name: 'team' } }
+    let(:create_attributes) { { team_name: 'team' } }
     let(:get_attributes)    { create_attributes.merge(id: 1234) }
     let(:update_attributes) { get_attributes }
     let(:first_params)      { get_attributes }
