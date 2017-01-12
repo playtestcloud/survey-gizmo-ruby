@@ -286,24 +286,23 @@ describe 'Survey Gizmo Resource' do
       let(:timestamp) { '2015-01-02'.to_time(:utc) }
       let(:answers) do
         {
-          '[question(3), option("10021-other")]' => 'Some other text field answer',
-          '[question(3), option(10021)]' => 'Other (required)',
-          '[question(5)]' => 'VERY important',
-          '[question(6)]' => nil,
-          '[question(7), option(10001)]' => nil,
-          '[question(8)]' => false,
-          '[question(9), option(10002)]' => '16',
-          '[question(10), question_pipe("Que aplicación")]' => '5 = Extremely important',
-          '[question(11), question_pipe(10527)]' => 'This product was too expensive',
-          # Sometimes surveygizmo only includes the option with the "other" answer.  =(
-          '[question(12)]' => 'Other - Please explain',
-          '[question(12), option("10017-other")]' => 'I understood...'
+          5 => {
+            'id' => 5,
+            'type' => "TEXTBOX",
+            'shown' => true,
+            'answer' => 'VERY important'
+          },
+          6 => {
+            'id' => 6,
+            'type' => "TEXTBOX",
+            'shown' => false
+          }
         }
       end
 
       it 'should propagate time, survey_id, and response_id' do
         response = described_class.new(
-          answers: answers.select { |k, v| k == "[question(5)]"},
+          answers: answers.select { |k, v| k == 5},
           survey_id: survey_id,
           id: response_id,
           submitted_at: timestamp
