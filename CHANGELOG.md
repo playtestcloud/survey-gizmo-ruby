@@ -1,5 +1,8 @@
 # Versions
 
+## 6.5.0
+* Drop support for ruby 2.0; allow ActiveSupport 5.x
+
 ## 6.2.10
 * Fix question pipe parsing when there's an integer without quotes instead of a quoted string (#87)
 
