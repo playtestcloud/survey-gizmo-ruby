@@ -11,6 +11,7 @@ module SurveyGizmo
       attribute :type, String
       attribute :description, String
       attribute :shortname, String
+      attribute :comment, Boolean
       attribute :properties, Hash
       attribute :after, Integer
       attribute :options, Array[Option]
